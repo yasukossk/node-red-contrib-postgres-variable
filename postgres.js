@@ -106,8 +106,8 @@ module.exports = function(RED) {
                 port: node.postgresConfig.port,
                 database: node.postgresConfig.db,
                 ssl: node.postgresConfig.ssl,
-                idleTimeoutMillis: 1000,
-                connectionTimeoutMillis: 2000
+                idleTimeoutMillis: 20000000,
+                connectionTimeoutMillis: 20000000
             };
 
             var handleError = function(err, msg) {
@@ -118,13 +118,14 @@ module.exports = function(RED) {
             };
 
             var allConnectings = RED.settings.get('pgConnects') ? RED.settings.get('pgConnects') : false;
+            var timeoutConfig = RED.settings.get('pgTimeout') ? RED.settings.get('pgTimeout') : false;
 
             node.on('input', function(msg) {
                 if(allConnectings && msg.connectName){
                     var customConnect = msg.connectName;
                     var customConfig = allConnectings[customConnect];
-                    customConfig.idleTimeoutMillis = 2000;
-                    customConfig.connectionTimeoutMillis = 2000;
+                    customConfig.idleTimeoutMillis = timeoutConfig.idleTimeoutMillis;
+                    customConfig.connectionTimeoutMillis = timeoutConfig.connectionTimeoutMillis;
                     var pool = new Pool(customConfig);
                 }else{
                     var pool = new Pool(connectionConfig);
